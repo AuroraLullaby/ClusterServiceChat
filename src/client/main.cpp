@@ -89,7 +89,7 @@ int main(int argc, char **argv)
     // 初始化读写线程通信用的信号量
     sem_init(&rwsem, 0, 0);
 
-    // 连接服务器成功，启动接收子线程
+    // 连接服务器成功，启动接收子线程,只要来连接到服务器，子线程就启动
     std::thread readTask(readTaskHandler, clientfd); // pthread_create
     readTask.detach();                               // pthread_detach
 
@@ -125,7 +125,7 @@ int main(int argc, char **argv)
             js["password"] = pwd;
             string request = js.dump(); // 发送方是序列化，接受方是反序列化
 
-            g_isLoginSuccess = false;
+            g_isLoginSuccess = false; // 登录登出
 
             int len = send(clientfd, request.c_str(), strlen(request.c_str()) + 1, 0);
             if (len == -1)
@@ -134,7 +134,7 @@ int main(int argc, char **argv)
             }
 
             sem_wait(&rwsem); // 等待信号量，由子线程处理完登录的响应消息后，通知这里
-                
+             // 主线程被唤醒，登录成功   
             if (g_isLoginSuccess) 
             {
                 // 进入聊天主菜单页面
@@ -207,6 +207,7 @@ void doRegResponse(json &responsejs)
         cout << "name register success, userid is " << responsejs["id"]
                 << ", do not forget it!" << endl;
     }
+    // 注册不需要想登录一样判断成功失败，都返回主界面就可以
 }
 
 // 处理登录的响应逻辑
@@ -296,7 +297,7 @@ void doLoginResponse(json &responsejs)
             }
         }
 
-        g_isLoginSuccess = true;
+        g_isLoginSuccess = true; // 登录成功
 
     }
 }
@@ -307,7 +308,7 @@ void readTaskHandler(int clientfd)
     for (;;) 
     {
         char buffer[1024] = {0};
-        int len = recv(clientfd, buffer, 1024, 0);  // 阻塞了
+        int len = recv(clientfd, buffer, 1024, 0);       // 阻塞了
         if (-1 == len || 0 == len)
         {
             close(clientfd);
@@ -340,7 +341,7 @@ void readTaskHandler(int clientfd)
 
         if (REG_MSG_ACK == msgtype)
         {
-            doRegResponse(js);
+            doRegResponse(js);    // 处理注册响应的业务逻辑
             sem_post(&rwsem);    // 通知主线程，注册结果处理完成
             continue;
         }
