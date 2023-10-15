@@ -1,7 +1,9 @@
 # ClusterServiceChat
-1.基于muduo网络库实现  
-2.Json实现数据的序列化与反序列化    
-3.nginx反向代理实现负载均衡  
-4.通过mysql数据库实现在线信息的实时收发和离线信息的缓存功能(include/server/db)  
-5.通过redis的发布订阅模式工作在nginx /tcp 负载均衡模式下实现集群的聊天服务(include/server/redis)    
+1.基于muduo网络库实现，提供高并发IO服务，并将网络模块代码和通信业务模块代码解耦  
+2.Json实现数据的序列化与反序列化作为私有通信协议  
+3.通过线性池提高了数据库的存储性能  
+4.nginx反向代理实现负载均衡，实现聊天服务器的集群功能，提高后端服务的并发能力  
+5.通过mysql数据库实现在线信息的实时收发和离线信息的缓存功能，提高项目数据的落盘存储(include/server/db)  
+6.通过redis的发布订阅模式工作在nginx /tcp 负载均衡模式下，实现跨服务器的信息通信(include/server/redis)  
+
 
